@@ -57,7 +57,7 @@ export default function Menus() {
               transition={{ duration: 0.5, delay: index * 0.2 }}
               className="bg-white rounded-lg shadow-lg overflow-hidden"
             >
-              <div className="p-6">
+              <div className="p-6 pb-8">
                 <h2 className="text-2xl font-playfair font-bold text-olive mb-2">
                   {menu.name}
                 </h2>
@@ -70,13 +70,6 @@ export default function Menus() {
                     </li>
                   ))}
                 </ul>
-                <motion.button
-                  className="btn-primary w-full mt-6"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Réserver ce menu
-                </motion.button>
               </div>
             </motion.div>
           ))}
