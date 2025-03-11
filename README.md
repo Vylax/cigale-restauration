@@ -1,11 +1,8 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Cigale Restauration
 
-# TODO
-```
-Remove the pictures link and use actual local pictures instead
-```
+This is a Next.js application for Cigale Restauration.
 
-## Getting Started
+## Development
 
 First, run the development server:
 
@@ -13,30 +10,137 @@ First, run the development server:
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment on OVH VPS (Ubuntu) using Docker
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Prerequisites
 
-## Learn More
+- SSH access to your OVH VPS running Ubuntu
+- Docker and Docker Compose installed on your VPS
+- Git installed on your VPS
 
-To learn more about Next.js, take a look at the following resources:
+### Installation Steps
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Connect to your VPS via SSH:
+   ```bash
+   ssh user@your-vps-ip
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+2. Install Docker and Docker Compose on Ubuntu if not already installed:
+   ```bash
+   # Update package lists
+   sudo apt update
 
-## Deploy on Vercel
+   # Install required packages
+   sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   # Add Docker's official GPG key
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# cigale-restauration
+   # Add Docker repository
+   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+   # Update package lists again
+   sudo apt update
+
+   # Install Docker
+   sudo apt install -y docker-ce docker-ce-cli containerd.io
+
+   # Install Docker Compose
+   sudo curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   sudo chmod +x /usr/local/bin/docker-compose
+
+   # Start Docker and enable it to start on boot
+   sudo systemctl start docker
+   sudo systemctl enable docker
+
+   # Add your user to the docker group to run docker without sudo
+   sudo usermod -aG docker $USER
+   
+   # Apply the new group membership (or you can log out and log back in)
+   newgrp docker
+   ```
+
+3. Clone your repository:
+   ```bash
+   git clone https://your-repository-url.git
+   cd your-repository-directory
+   ```
+
+4. Deploy the application:
+   ```bash
+   # Make the deployment script executable
+   chmod +x deploy.sh
+   
+   # Run the deployment script
+   ./deploy.sh
+   ```
+
+5. Your application should now be running at `http://your-vps-ip:3001`
+
+### Managing Your Deployment
+
+- View logs:
+  ```bash
+  docker-compose logs -f app
+  ```
+
+- Stop the application:
+  ```bash
+  docker-compose down
+  ```
+
+- Restart the application:
+  ```bash
+  docker-compose restart
+  ```
+
+- Update the application:
+  ```bash
+  git pull
+  docker-compose up -d --build
+  ```
+
+### Setting Up a Domain Name and HTTPS
+
+For production use, you should set up a domain name and HTTPS. You can use Nginx as a reverse proxy with Let's Encrypt for SSL certificates.
+
+1. Install Nginx and Certbot on Ubuntu:
+   ```bash
+   sudo apt install -y nginx certbot python3-certbot-nginx
+   ```
+
+2. Create an Nginx configuration file for your domain:
+   ```bash
+   sudo nano /etc/nginx/sites-available/your-domain.com
+   ```
+
+3. Add the following configuration:
+   ```nginx
+   server {
+       listen 80;
+       server_name your-domain.com www.your-domain.com;
+
+       location / {
+           proxy_pass http://localhost:3001;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+       }
+   }
+   ```
+
+4. Enable the site and get SSL certificates:
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/your-domain.com /etc/nginx/sites-enabled/
+   sudo nginx -t
+   sudo systemctl reload nginx
+   sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+   ```
+
+5. Your application should now be accessible at `https://your-domain.com`

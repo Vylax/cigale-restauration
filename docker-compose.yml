@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    # Add any environment variables your app needs here
+    # env_file:
+    #   - .env.production
+    
+  # If you need a database or other services, you can add them here
+  # For example:
+  # db:
+  #   image: postgres:14
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_PASSWORD=your_password
+  #     - POSTGRES_USER=your_user
+  #     - POSTGRES_DB=your_db
+
+# volumes:
+#   postgres_data: 
