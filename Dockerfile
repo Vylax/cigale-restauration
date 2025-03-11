@@ -24,7 +24,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # Create a non-root user to run the application
 RUN addgroup --system --gid 1001 nodejs
@@ -45,7 +45,7 @@ USER nextjs
 EXPOSE 3001
 
 # Set the environment variable for the port
-ENV PORT 3001
+ENV PORT=3001
 
 # Start the application
 CMD ["node", "server.js"] 
